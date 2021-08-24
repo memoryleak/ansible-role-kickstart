@@ -1,0 +1,15 @@
+---
+- name: Generate kickstart file
+  template:
+    dest: "{{ kickstart_output_directory }}/{{ kickstart_output_filename }}"
+    src: "{{ kickstart_template }}"
+    trim_blocks: true
+    validate: "{{ kickstart_validate_cmd }}"
+  tags:
+    - template
+
+- name: Flatten the kickstart
+  command: "{{ kickstart_flatten_cmd }} -c {{ kickstart_output_directory }}/{{ kickstart_output_filename }} -o {{ kickstart_output_directory }}/{{ kickstart_output_filename }}"
+  tags:
+    - command
+    - custom tags

@@ -1,0 +1,56 @@
+# Use graphical install
+graphical
+
+# Poweroff after installation
+reboot
+
+# Keyboard layouts
+keyboard --xlayouts='{{ kickstart_xlayouts }}'
+
+# System language
+lang en_US.UTF-8
+
+# Generated using Blivet version 3.3.0
+ignoredisk --only-use=vda
+
+# Partition clearing information
+clearpart --all --initlabel
+
+# Disk partitioning information
+autopart --type=plain --fstype=xfs
+
+# System timezone
+timezone {{ kickstart_timezone }} --utc
+
+# Passwords
+rootpw --iscrypted {{ kickstart_root_password }}
+
+# Create users
+{% for user in kickstart_users %}
+user --iscrypted --groups={{ user.groups }} --name={{ user.name }} --password={{ user.password }}
+{% endfor %}
+
+# Add authorized_keys entries
+{% for user in kickstart_users %}
+{% if user.ssh_key is not false %}
+sshkey --username={{ user.name }} "{{ user.ssh_key }}"
+{% endif %}
+{% endfor %}
+
+# Network information
+network --bootproto=dhcp --activate --hostname={{ kickstart_hostname }}
+
+# Post installation tweaks
+%post --log=/root/kickstart_post.log
+{{ kickstart_post | default("") }}
+%end
+
+# pre installation tweaks
+%pre
+{{ kickstart_pre | default("") }}
+%end
+
+# Additional Kickstart files
+{% for include in kickstart_includes %}
+%include {{ include }}
+{% endfor %}
