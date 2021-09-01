@@ -1,0 +1,56 @@
+---
+# Passwords are always 'ansible'
+
+kickstart_flatten_cmd: 'ksflatten'
+kickstart_hostname: "ansible.exmample.com"
+kickstart_output_directory: '/tmp'
+kickstart_output_filename: 'ansible.cfg'
+kickstart_template: "base.cfg.j2"
+kickstart_timezone: Europe/Zurich
+kickstart_validate_cmd: 'ksvalidator -i %s'
+kickstart_xlayouts: ch
+
+kickstart_root_password: "$6$TP0tXpUQduGwQT3M$11/iADQXXCNGnFJktBSqYxcYnCpOfsTl3.axTIblxPEGoLQJOMBBVsXd2IfjYr12VkrJIrtBhu6tL6jS4IlRb/"
+kickstart_root_sshkey: false
+
+kickstart_users:
+  - name: ansible
+    groups: wheel
+    password: "$6$TP0tXpUQduGwQT3M$11/iADQXXCNGnFJktBSqYxcYnCpOfsTl3.axTIblxPEGoLQJOMBBVsXd2IfjYr12VkrJIrtBhu6tL6jS4IlRb/"
+    ssh_key: false
+
+
+kickstart_post: |
+  cat <<EOF > /etc/profile.d/ps1.sh
+  PS1="\[\e[32m\]\u\[\e[m\]@\[\e[31m\]\h\[\e[m\]:[\[\e[35m\]\W\[\e[m\]]: "
+  EOF
+  echo "%wheel     ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/wheel
+  echo "DefaultLimitNOFILE=1024:524288" >> /etc/systemd/user.conf
+  echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
+  echo "fastestmirror=1" >> /etc/dnf/dnf.conf
+
+
+kickstart_includes: []
+kickstart_packages:
+  - "@guest-agents"
+  - "qemu-guest-agent"
+  - "python3"
+
+kickstart_networks:
+  - device: enp1s0
+    bootproto: static
+    ip: 192.168.1.50
+    netmask: 255.255.255.0
+    gateway: 192.168.1.1
+    nameserver: 192.168.1.10,192.168.1.11
+    onboot: "on"
+    noipv6: true
+    hostname: "{{ kickstart_hostname }}"
+
+kickstart_firewall:
+  enable: true
+  ssh: true
+
+kickstart_repos: []
+  # - name: "test"
+  #   baseurl: "http://example.com"

@@ -1,0 +1,90 @@
+# Use graphical install
+graphical
+
+# Poweroff after installation
+reboot
+
+# Keyboard layouts
+keyboard --xlayouts='{{ kickstart_xlayouts }}'
+
+# System language
+lang en_US.UTF-8
+
+# Use only vda
+ignoredisk --only-use=vda
+
+# Partition clearing information
+clearpart --all --initlabel
+
+# Disk partitioning information
+autopart --type=plain --fstype=xfs
+
+# Set boot loader or ksflatten will break your kickstart
+bootloader --location mbr
+
+# System timezone
+timezone {{ kickstart_timezone }} --utc
+
+# Passwords
+rootpw --iscrypted {{ kickstart_root_password }}
+
+# Create users
+{% for user in kickstart_users %}
+user --iscrypted --groups={{ user.groups }} --name={{ user.name }} --password={{ user.password }}
+
+{% endfor %}
+
+# Add authorized_keys entries
+{% for user in kickstart_users %}
+{% if user.ssh_key is not false %}sshkey --username={{ user.name }} "{{ user.ssh_key }}"{% endif %}
+
+{% endfor %}
+
+# Network information
+{% for network in kickstart_networks %}
+network {% for key, value in network.items() %} {% if value is true %} --{{ key }} {% else %} --{{ key }}={{ value }}{% endif %}{% endfor %}
+
+{% endfor %}
+
+# Firewall information
+{% if kickstart_firewall is defined %}
+firewall {% for key, value in kickstart_firewall.items() %} {% if value is true %} --{{ key }} {% else %} --{{ key }}={{ value }}{% endif %}{% endfor %}
+
+{% endif %}
+
+# Installation URL
+{% if kickstart_url is defined %}
+url {{ kickstart_url }}
+{% endif %}
+
+# Additional repositories
+{% for repo in kickstart_repos %}
+repo {% for key, value in repo.items() %} {% if value is true %} --{{ key }} {% else %} --{{ key }}={{ value }}{% endif %}{% endfor %}
+
+{% endfor %}
+
+# Post installation tweaks
+%post --log=/root/kickstart_post.log
+{{ kickstart_post | default("") }}
+
+%end
+
+# pre installation tweaks
+%pre
+{{ kickstart_pre | default("") }}
+
+%end
+
+# Additional Kickstart files
+{% for include in kickstart_includes %}
+%include {{ include }}
+
+{% endfor %}
+
+# Packages to install
+%packages
+{% for package in kickstart_packages %}
+{{ package }}
+
+{% endfor %}
+%end
