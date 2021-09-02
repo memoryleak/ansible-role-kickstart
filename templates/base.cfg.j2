@@ -17,7 +17,9 @@ ignoredisk --only-use=vda
 clearpart --all --initlabel
 
 # Disk partitioning information
-autopart --type=plain --fstype=xfs
+part /boot --fstype=xfs --size=1024
+part swap --fstype=swap --size=4096
+part / --fstype=xfs --grow
 
 # Set boot loader or ksflatten will break your kickstart
 bootloader --location mbr
