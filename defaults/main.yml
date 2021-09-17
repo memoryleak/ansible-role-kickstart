@@ -51,6 +51,8 @@ kickstart_firewall:
   enable: true
   ssh: true
 
+kickstart_selinux: enforcing
+
 kickstart_repos: []
   # - name: "test"
   #   baseurl: "http://example.com"

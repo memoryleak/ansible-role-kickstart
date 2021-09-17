@@ -48,6 +48,10 @@ network {% for key, value in network.items() %} {% if value is true %} --{{ key 
 
 {% endfor %}
 
+{% if kickstart_selinux is defined %}
+selinux --{{ kickstart_selinux  }}
+{%endif }
+
 # Firewall information
 {% if kickstart_firewall is defined %}
 firewall {% for key, value in kickstart_firewall.items() %} {% if value is true %} --{{ key }} {% else %} --{{ key }}={{ value }}{% endif %}{% endfor %}
